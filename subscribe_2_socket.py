@@ -41,6 +41,7 @@ def on_message(client, userdata, message):
     print("message received -->" ,message.payload.decode('utf-8'))
     print("message topic =",message.topic)
     client.send(message.payload.decode('utf-8')).encode()
+    client.send('{"mqtt_recv":"ok"}').encode()
 
 while (mqtt_transport == 0):
     client.send(("mqtt").encode())
@@ -64,18 +65,20 @@ except:
     mqtt_transport = 0
 
 while(mqtt_transport == 1):
+    error = 0
     # MQTT connection
     mqtt_sub = mqtt.Client()
     mqtt_sub.on_message = on_message
     mqtt_sub.on_connect = on_connect
     try:
         mqtt_sub.connect(mqtt_ip, 1883)
-        client.send('{"mqtt_recv":"ok"}').encode()
+    except:
+        client.send('{"mqtt_recv":"broker_error"}').encode()
+        error = 1
+    if (not error):
         mqtt_sub.loop_start()
         time.sleep(1)
         mqtt_sub.loop_stop()
-    except:
-        client.send('{"mqtt_recv":"broker_error"}').encode()
 '''
     data_check = 0
     print("-----------------------------------------------------------")
