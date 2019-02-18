@@ -5,8 +5,9 @@ import time
 import json
 import datetime
 import paho.mqtt.client as mqtt
- 
-socket_host = "www.google.com"
+
+#import .mqttModule/socket_2_publish
+socket_host = "127.0.0.1"
 socket_port = 9808
 
 mqtt_transport = 0
@@ -16,27 +17,29 @@ mqtt_qos = 0
 #publisher 9808 sub 9807
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect((socket_host, socket_port))
-client.settimeout(None)
+#client.settimeout(None)
 
 while (mqtt_transport == 0):
-    client.send(("mqtt").encode())
-    client.settimeout(None)
+    #client.send(("mqtt").encode())
+    client.send(b"mqtt")
+    #client.settimeout(None)
     response = client.recv(4096).decode('utf-8')
+    print(response)
     try:
-        socket_rec = response.loads(response)
+        socket_rec = json.loads(response)
         mqtt_ip = socket_rec['broker']
         mqtt_topic = socket_rec['topic']
         mqtt_qos = socket_rec['qos']
         mqtt_transport = 1
-    except:
+    except ValueError:
         mqtt_transport = 0
 
 try:
     mqtt_pub = mqtt.Client()
     mqtt_pub.connect(mqtt_ip, 1883)
-    client.send('{"status":"create"}').encode()
+    client.send(b'{"status":"create"}').encode()
 except:
-    client.send('{"status":"error"}')
+    client.send(b'{"status":"error"}')
     mqtt_transport = 0
 
 while(mqtt_transport == 1):
