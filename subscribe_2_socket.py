@@ -41,10 +41,10 @@ def on_message(client, userdata, message):
     print("message received -->" ,message.payload.decode('utf-8'))
     print("message topic =",message.topic)
     client.send(message.payload.decode('utf-8')).encode()
-    client.send('{"mqtt_recv":"ok"}').encode()
+    client.send(b'{"mqtt_recv":"ok"}').encode()
 
 while (mqtt_transport == 0):
-    client.send(("mqtt").encode())
+    client.send(b'mqtt').encode()
     client.settimeout(None)
     response = client.recv(4096).decode('utf-8')
     try:
@@ -59,9 +59,9 @@ while (mqtt_transport == 0):
 try:
     mqtt_conn = mqtt.Client()
     mqtt_conn.connect(mqtt_ip, 1883)
-    client.send('{"status":"create"}').encode()
+    client.send(b'{"status":"create"}').encode()
 except:
-    client.send('{"status":"error"}')
+    client.send(b'{"status":"error"}')
     mqtt_transport = 0
 
 while(mqtt_transport == 1):
@@ -73,7 +73,7 @@ while(mqtt_transport == 1):
     try:
         mqtt_sub.connect(mqtt_ip, 1883)
     except:
-        client.send('{"mqtt_recv":"broker_error"}').encode()
+        client.send(b'{"mqtt_recv":"broker_error"}').encode()
         error = 1
     if (not error):
         mqtt_sub.loop_start()

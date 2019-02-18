@@ -54,7 +54,7 @@ while(mqtt_transport == 1):
         print("json data = ", data)
         data_check = 1
     except:
-        client.send('{"mqtt_send":"data_error"}').encode()
+        client.send(b'{"mqtt_send":"data_error"}').encode()
         print("json data error")
 
     if(data_check == 1):
@@ -63,10 +63,10 @@ while(mqtt_transport == 1):
             mqtt_pub.publish(mqtt_topic, response, mqtt_qos)
             now = datetime.datetime.now()
             print('MQTT To Server OK ! -->' , now)
-            client.send('{"mqtt_send":"ok"}').encode()
+            client.send(b'{"mqtt_send":"ok"}').encode()
         except:
             print('MQTT To Server Error ! -->' , now)
-            client.send('{"mqtt_send":"broker_error"}').encode()
+            client.send(b'{"mqtt_send":"broker_error"}').encode()
     else:
         pass
     print("-----------------------------------------------------------")
