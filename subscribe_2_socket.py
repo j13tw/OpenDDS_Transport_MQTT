@@ -40,15 +40,15 @@ def on_message(client, userdata, message):
     print('------------------------------------------------------')
     print("message received -->" ,message.payload.decode('utf-8'))
     print("message topic =",message.topic)
-    client.send(message.payload.decode('utf-8')).encode()
-    client.send(b'{"mqtt_recv":"ok"}').encode()
+    client.send(message.payload.decode('utf-8'))
+    client.send(b'{"mqtt_recv":"ok"}')
 
 while (mqtt_transport == 0):
     client.send(b'mqtt').encode()
     client.settimeout(None)
     response = client.recv(4096).decode('utf-8')
     try:
-        socket_rec = response.loads(response)
+        socket_rec = json.loads(response)
         mqtt_ip = socket_rec['broker']
         mqtt_topic = socket_rec['topic']
         mqtt_qos = socket_rec['qos']
@@ -59,26 +59,16 @@ while (mqtt_transport == 0):
 try:
     mqtt_conn = mqtt.Client()
     mqtt_conn.connect(mqtt_ip, 1883)
-    client.send(b'{"status":"create"}').encode()
+    client.send(b'{"status":"create"}')
 except:
     client.send(b'{"status":"error"}')
     mqtt_transport = 0
 
-while(mqtt_transport == 1):
-    error = 0
+if (mqtt_transport == 1):
     # MQTT connection
-    mqtt_sub = mqtt.Client()
-    mqtt_sub.on_message = on_message
-    mqtt_sub.on_connect = on_connect
-    try:
-        mqtt_sub.connect(mqtt_ip, 1883)
-    except:
-        client.send(b'{"mqtt_recv":"broker_error"}').encode()
-        error = 1
-    if (not error):
-        mqtt_sub.loop_start()
-        time.sleep(1)
-        mqtt_sub.loop_stop()
+    mqtt_conn.on_message = on_message
+    mqtt_conn.on_connect = on_connect
+    mqtt_conn.loop_forever()
 '''
     data_check = 0
     print("-----------------------------------------------------------")
