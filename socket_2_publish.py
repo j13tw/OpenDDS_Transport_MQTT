@@ -37,16 +37,20 @@ while (mqtt_transport == 0):
 try:
     mqtt_pub = mqtt.Client()
     mqtt_pub.connect(mqtt_ip, 1883)
-    client.send(b'{"status":"create"}').encode()
+    mqtt_pub.message_retry_set(1)
+    client.send(b'{"status":"create"}')
 except:
     client.send(b'{"status":"error"}')
     mqtt_transport = 0
 
+count = 0
+
 while(mqtt_transport == 1):
     data_check = 0
+    count += 1
     print("-----------------------------------------------------------")
     response = client.recv(4096).decode('utf-8')
-    print("socket data : ", response)
+    print("socket data", str(count) + " : ", response)
     print("-----------------------------------------------------------")
     try:
         socket_rec = json.loads(response)
@@ -54,20 +58,17 @@ while(mqtt_transport == 1):
         print("json data = ", data)
         data_check = 1
     except:
-        client.send(b'{"mqtt_send":"data_error"}').encode()
+        client.send(b'{"mqtt_send":"data_error"}')
         print("json data error")
 
     if(data_check == 1):
         try:
-            mqtt_pub.connect(mqtt_ip, 1883)
             mqtt_pub.publish(mqtt_topic, response, mqtt_qos)
             now = datetime.datetime.now()
             print('MQTT To Server OK ! -->' , now)
-            client.send(b'{"mqtt_send":"ok"}').encode()
+            client.send(b'{"mqtt_send":"ok"}')
         except:
             print('MQTT To Server Error ! -->' , now)
-            client.send(b'{"mqtt_send":"broker_error"}').encode()
+            client.send(b'{"mqtt_send":"broker_error"}')
     else:
         pass
-    print("-----------------------------------------------------------")
-    time.sleep(3)
