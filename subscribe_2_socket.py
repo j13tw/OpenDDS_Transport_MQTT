@@ -6,7 +6,7 @@ import json
 import datetime
 import paho.mqtt.client as mqtt
  
-socket_host = "www.google.com"
+socket_host = "0.0.0.0"
 socket_port = 9807
 
 mqtt_transport = 0
@@ -21,30 +21,37 @@ client.settimeout(None)
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
-    mqtt_sub.subscribe(mqtt_topic, mqtt_qos)
+    #mqtt_sub.subscribe(mqtt_topic, mqtt_qos)
+    client.subscribe(mqtt_topic, mqtt_qos)
 
-def on_message(client, userdata, message):
+def on_message(mClient, userdata, message):
+    global client
     now = datetime.datetime.now()
     year = str(now.year)
-    month = str(now.month)
-    if (int(month) < 10): month = "0" + str(month)
-    day = str(now.day)
-    if (int(day) < 10): day = "0" + str(day)
-    hour = str(now.hour)
-    if (int(hour) < 10): hour = "0" + str(hour)
-    minute = str(now.minute)
-    if (int(minute) < 10): minute = "0" + str(minute)
-    second = str(now.second)
-    if (int(second) < 10): second = "0" + str(second)
+    month = "{:02}".format(now.month)
+    #if (int(month) < 10): month = "0" + str(month)
+    #day = str(now.day)
+    day = "{:02}".format(now.day)
+    #if (int(day) < 10): day = "0" + str(day)
+    #hour = str(now.hour)
+    hour = "{:02}".format(now.hour)
+    #if (int(hour) < 10): hour = "0" + str(hour)
+    #minute = str(now.minute)
+    minute = "{:02}".format(now.minute)
+    #if (int(minute) < 10): minute = "0" + str(minute)
+    #second = str(now.second)
+    second = "{:02}".format(now.second)
+    #if (int(second) < 10): second = "0" + str(second)
     micro_second = str(int(datetime.datetime.now().microsecond/100))
-    print('------------------------------------------------------')
+    #print('------------------------------------------------------')
     print("message received -->" ,message.payload.decode('utf-8'))
-    print("message topic =",message.topic)
-    client.send(message.payload.decode('utf-8'))
+    #print("message topic =",message.topic)
+    #client.send(message.payload.encode('utf-8'))
+    client.send(message.payload)
     client.send(b'{"mqtt_recv":"ok"}')
 
 while (mqtt_transport == 0):
-    client.send(b'mqtt').encode()
+    client.send(b'mqtt')
     client.settimeout(None)
     response = client.recv(4096).decode('utf-8')
     try:
